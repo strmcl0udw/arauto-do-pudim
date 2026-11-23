@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>O Arauto do Pudim — Notícias 100% Verídicas e Inúteis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =====================================================================
+       VARIÁVEIS DINÂMICAS CONTROLADAS PELO SCROLL (0.0 -> 1.0)
+       ===================================================================== */
+    :root {
+      --scroll-ratio: 0;
+      --bg-color: #fffdf5;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --accent: #f59e0b;
+      --border-color: #fde68a;
+      --glitch-offset: 0px;
+      --scanline-opacity: 0;
+      --vignette-opacity: 0;
+      --chromatic-shift: 0px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      position: relative;
+    }
+
+    /* =====================================================================
+       CAMADAS DE EFEITOS DE TERROR (SCANLINES, VINHETA, ESTÁTICA VHS)
+       ===================================================================== */
+    #vhs-scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 900;
+      opacity: var(--scanline-opacity);
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0px,
+        rgba(0, 0, 0, 0) 2px,
+        rgba(0, 0, 0, 0.35) 3px,
+        rgba(0, 0, 0, 0.35) 4px
+      );
+      mix-blend-mode: multiply;
+    }
+
+    #horror-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 901;
+      opacity: var(--vignette-opacity);
+      background: radial-gradient(
+        circle at center,
+        transparent 35%,
+        rgba(40, 0, 0, 0.75) 80%,
+        rgba(0, 0, 0, 0.98) 100%
+      );
+    }
+
+    #static-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 902;
+      opacity: 0;
+      mix-blend-mode: screen;
+    }
+
+    /* =====================================================================
+       ANIMAÇÕES DE GLITCH, TREMOR E DISTORÇÃO
+       ===================================================================== */
+    @keyframes microGlitch {
+      0% { transform: translate(0, 0) skew(0deg); }
+      20% { transform: translate(-2px, 1px) skew(-0.6deg); }
+      40% { transform: translate(2px, -1px) skew(0.6deg); }
+      60% { transform: translate(-1px, -1px) skew(0deg); }
+      80% { transform: translate(1px, 2px) skew(-0.4deg); }
+      100% { transform: translate(0, 0) skew(0deg); }
+    }
+
+    @keyframes violentShake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-4px, -3px) rotate(-0.5deg); }
+      20% { transform: translate(5px, 2px) rotate(0.6deg); }
+      30% { transform: translate(-6px, 4px) rotate(-0.4deg); }
+      40% { transform: translate(4px, -4px) rotate(0.5deg); }
+      50% { transform: translate(-3px, 3px) rotate(-0.6deg); }
+      60% { transform: translate(6px, -2px) rotate(0.3deg); }
+      70% { transform: translate(-5px, -3px) rotate(-0.5deg); }
+      80% { transform: translate(3px, 4px) rotate(0.4deg); }
+      90% { transform: translate(-2px, -2px) rotate(-0.2deg); }
+    }
+
+    @keyframes tickerMarquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      animation: tickerMarquee 28s linear infinite;
+    }
+
+    .ticker-track:hover {
+      animation-play-state: paused;
+    }
+
+    .uncanny-hover:hover {
+      animation: microGlitch 0.28s infinite;
+    }
+
+    .chromatic-text {
+      text-shadow:
+        calc(var(--chromatic-shift) * -1) 0 0 rgba(255, 0, 50, 0.85),
+        var(--chromatic-shift) 0 0 rgba(0, 255, 240, 0.85);
+    }
+
+    .shake-intense {
+      animation: violentShake 0.32s infinite;
+    }
+
+    .invert-flash {
+      filter: invert(1) contrast(1.8) hue-rotate(180deg) !important;
+    }
+
+    /* Tipografias de transição */
+    .font-horror-mono {
+      font-family: 'Courier Prime', monospace;
+    }
+
+    .font-editorial {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Cards adaptáveis */
+    .news-card {
+      background-color: var(--card-bg);
+      border: 2px solid var(--border-color);
+      transition: transform 0.35s ease, background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    /* Overlay de tela cheia no clímax */
+    #final-takeover {
+      position: fixed;
+      inset: 0;
+      background: #050000;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ff1a1a;
+      text-align: center;
+      padding: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlays atmosféricos -->
+  <div id="vhs-scanlines"></div>
+  <div id="horror-vignette"></div>
+  <canvas id="static-canvas"></canvas>
+
+  <!-- =====================================================================
+       CABEÇALHO DO PORTAL (COMEÇA ALEGRE E VAI CORROMPENDO)
+       ===================================================================== -->
+  <header id="main-header" class="sticky top-0 z-50 transition-colors duration-300 border-b-2 border-amber-300 bg-amber-400 text-slate-900 shadow-sm">
+    <!-- Barra superior de utilidades -->
+    <div id="top-utility-bar" class="bg-amber-500/80 px-4 py-1.5 text-xs font-semibold flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <span id="weather-widget" class="inline-flex items-center gap-1 bg-white/80 text-amber-900 px-2.5 py-0.5 rounded-full">
+          ☀️ 26°C — Ensolarado com chance de paçoca
+        </span>
+        <span id="date-widget" class="hidden sm:inline opacity-90">Edição Matinal • 100% Livre de Estresse</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="audio-toggle-btn" type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-amber-300 hover:bg-slate-800 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer shadow">
+          <span id="audio-icon">🔇</span>
+          <span id="audio-label">Ativar Som Ambiente</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Título principal e navegação -->
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div id="logo-badge" class="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-md border-2 border-amber-600 select-none">
+          🍮
+        </div>
+        <div>
+          <h1 id="site-title" class="text-2xl sm:text-3xl font-black tracking-tight leading-none">
+            O ARAUTO DO PUDIM
+          </h1>
+          <p id="site-subtitle" class="text-xs sm:text-sm font-semibold opacity-85 mt-0.5">
+            As notícias mais inúteis, fofas e verídicas da internet
+          </p>
+        </div>
+      </div>
+
+      <nav id="site-nav" class="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm font-bold">
+        <a href="#secao-humor" class="nav-pill px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white transition">😂 Humor</a>
+        <a href="#secao-bichinhos" class="nav-pill px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white transition">🐶 Bichinhos</a>
+        <a href="#secao-bairro" class="nav-pill px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white transition">🏘️ Fofocas do Bairro</a>
+        <a href="#secao-arquivos" class="nav-pill px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white transition">🔮 Horóscopo</a>
+      </nav>
+    </div>
+
+    <!-- Ticker de notícias rolante -->
+    <div id="ticker-bar" class="bg-slate-900 text-amber-300 py-1.5 overflow-hidden border-t border-amber-600/40 text-xs sm:text-sm font-bold">
+      <div id="ticker-track" class="ticker-track">
+        <span class="mx-6">🚨 URGENTE: Gato aprende a abrir a geladeira e exige vale-alimentação •</span>
+        <span class="mx-6">🦆 Pato é eleito síndico de condomínio por unanimidade após prometer mais pão •</span>
+        <span class="mx-6">☕ Cientistas comprovam: segunda-feira deveria ser opcional por decreto federal •</span>
+        <span class="mx-6">🪴 Homem rega planta de plástico por 4 meses e diz que ela "parece mais agradecida" •</span>
+        <!-- Duplicado para loop contínuo -->
+        <span class="mx-6">🚨 URGENTE: Gato aprende a abrir a geladeira e exige vale-alimentação •</span>
+        <span class="mx-6">🦆 Pato é eleito síndico de condomínio por unanimidade após prometer mais pão •</span>
+        <span class="mx-6">☕ Cientistas comprovam: segunda-feira deveria ser opcional por decreto federal •</span>
+        <span class="mx-6">🪴 Homem rega planta de plástico por 4 meses e diz que ela "parece mais agradecida" •</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       CONTEÚDO PRINCIPAL (DIVIDIDO EM 4 ESTÁGIOS PSICOLÓGICOS)
+       ===================================================================== -->
+  <main class="max-w-5xl mx-auto px-4 py-8 space-y-16">
+
+    <!-- ===================================================================
+         ESTÁGIO 1 (0% - 25%): HUMOR LEVE, BOBO E ENSOLARADO
+         =================================================================== -->
+    <section id="secao-humor" class="space-y-8">
+      <!-- Matéria Principal (Hero) -->
+      <article class="news-card rounded-3xl overflow-hidden shadow-lg grid grid-cols-1 lg:grid-cols-12">
+        <div class="lg:col-span-6 bg-sky-100 flex items-center justify-center p-6 min-h-[260px]">
+          <!-- Ilustração SVG customizada: Pombo no ônibus -->
+          <svg viewBox="0 0 360 240" class="w-full max-w-sm h-auto rounded-2xl shadow-inner bg-sky-200">
+            <!-- Céu e nuvens -->
+            <circle cx="300" cy="48" r="24" fill="#FDE047" />
+            <ellipse cx="80" cy="45" rx="34" ry="14" fill="#FFFFFF" opacity="0.9" />
+            <ellipse cx="105" cy="42" rx="25" ry="12" fill="#FFFFFF" opacity="0.9" />
+            <!-- Asfalto -->
+            <rect x="0" y="185" width="360" height="55" fill="#475569" />
+            <rect x="20" y="210" width="45" height="6" rx="3" fill="#FACC15" />
+            <rect x="105" y="210" width="45" height="6" rx="3" fill="#FACC15" />
+            <rect x="190" y="210" width="45" height="6" rx="3" fill="#FACC15" />
+            <rect x="275" y="210" width="45" height="6" rx="3" fill="#FACC15" />
+            <!-- Ônibus -->
+            <rect x="35" y="75" width="230" height="110" rx="18" fill="#F59E0B" stroke="#B45309" stroke-width="4" />
+            <rect x="52" y="92" width="55" height="42" rx="8" fill="#E0F2FE" stroke="#0284C7" stroke-width="3" />
+            <rect x="120" y="92" width="55" height="42" rx="8" fill="#E0F2FE" stroke="#0284C7" stroke-width="3" />
+            <rect x="188" y="92" width="60" height="42" rx="8" fill="#E0F2FE" stroke="#0284C7" stroke-width="3" />
+            <!-- Letreiro do ônibus -->
+            <rect x="65" y="62" width="170" height="18" rx="6" fill="#1E293B" />
+            <text x="150" y="74" font-size="10" font-family="monospace" fill="#FDE047" text-anchor="middle" font-weight="bold">404 - TERMINAL MILHO</text>
+            <!-- Rodas -->
+            <circle cx="85" cy="185" r="20" fill="#1E293B" />
+            <circle cx="85" cy="185" r="9" fill="#CBD5E1" />
+            <circle cx="215" cy="185" r="20" fill="#1E293B" />
+            <circle cx="215" cy="185" r="9" fill="#CBD5E1" />
+            <!-- Pombo passageiro na janela -->
+            <ellipse cx="147" cy="122" rx="14" ry="16" fill="#94A3B8" />
+            <circle cx="147" cy="105" r="10" fill="#94A3B8" />
+            <circle cx="150" cy="103" r="3" fill="#FFFFFF" />
+            <circle cx="151" cy="103" r="1.5" fill="#0F172A" />
+            <polygon points="156,105 166,108 156,111" fill="#F97316" />
+            <!-- Maletinha do pombo -->
+            <rect x="135" y="122" width="16" height="11" rx="2" fill="#78350F" />
+          </svg>
+        </div>
+
+        <div class="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between space-y-4">
+          <div>
+            <span class="inline-block bg-amber-100 text-amber-800 text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-3">
+              🚌 Transporte Público & Aves
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-black leading-tight text-slate-900">
+              Pombo pega ônibus errado na hora do rush, desce três bairros depois e encara o ponto com cara de quem perdeu a hora
+            </h2>
+            <p class="mt-3 text-slate-600 text-sm sm:text-base leading-relaxed">
+              Segundo passageiros da linha 404, o passageiro emplumado embarcou tranquilamente pela porta da frente, cochilou perto da janela e só percebeu o engano quando avistou uma praça sem nenhuma pipoca no chão. Ele aguardou o próximo coletivo em silêncio.
+            </p>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-100">
+            <span>Por <strong>Redação Pudim</strong> • Há 14 minutos</span>
+            <span>❤️ 4.812 curtidas</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Grid de notícias bobas -->
+      <div id="secao-bichinhos" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <article class="news-card rounded-2xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <div class="w-full h-36 rounded-xl bg-emerald-100 mb-4 flex items-center justify-center">
+              <svg viewBox="0 0 200 120" class="w-36 h-24">
+                <ellipse cx="100" cy="85" rx="52" ry="18" fill="#D97706" />
+                <circle cx="62" cy="72" r="18" fill="#F59E0B" />
+                <ellipse cx="52" cy="76" rx="7" ry="13" fill="#B45309" />
+                <path d="M55 68 L62 72 M62 68 L55 72" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M135 55 Q150 40 160 55" stroke="#38BDF8" stroke-width="3" fill="none" />
+                <circle cx="155" cy="65" r="4" fill="#38BDF8" />
+                <text x="100" y="32" font-size="11" font-family="sans-serif" fill="#065F46" text-anchor="middle" font-weight="bold">DRAMÁTICO</text>
+              </svg>
+            </div>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Atuação de Oscar</span>
+            <h3 class="text-lg font-extrabold mt-2 leading-snug">
+              Golden Retriever finge desmaio teatral toda vez que ouve alguém pronunciar a palavra "banho"
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-2">
+              O tutor afirma que basta abrir o armário do shampoo para o cachorro cair em câmera lenta no tapete da sala com a língua para fora.
+            </p>
+          </div>
+          <span class="text-xs text-slate-400">Leitura de 1 min</span>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="news-card rounded-2xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <div class="w-full h-36 rounded-xl bg-rose-100 mb-4 flex items-center justify-center">
+              <svg viewBox="0 0 200 120" class="w-36 h-24">
+                <polygon points="80,105 120,105 114,72 86,72" fill="#EA580C" />
+                <path d="M100 72 L100 35 M100 55 L82 42 M100 48 L118 36" stroke="#16A34A" stroke-width="5" stroke-linecap="round" />
+                <circle cx="82" cy="42" r="6" fill="#22C55E" />
+                <circle cx="118" cy="36" r="6" fill="#22C55E" />
+                <circle cx="100" cy="32" r="7" fill="#22C55E" />
+                <text x="100" y="20" font-size="10" font-family="sans-serif" fill="#9F1239" text-anchor="middle" font-weight="bold">100% POLIÉSTER</text>
+              </svg>
+            </div>
+            <span class="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full">Jardinagem</span>
+            <h3 class="text-lg font-extrabold mt-2 leading-snug">
+              Aposentado rega samambaia de plástico por dois anos e garante que ela "cresceu dois centímetros"
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-2">
+              A família decidiu não contar a verdade porque o brilho nos olhos dele toda manhã vale mais do que o piso molhado da varanda.
+            </p>
+          </div>
+          <span class="text-xs text-slate-400">Leitura de 2 min</span>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="news-card rounded-2xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <div class="w-full h-36 rounded-xl bg-violet-100 mb-4 flex items-center justify-center">
+              <svg viewBox="0 0 200 120" class="w-36 h-24">
+                <circle cx="100" cy="62" r="34" fill="#FFFFFF" stroke="#7C3AED" stroke-width="4" />
+                <line x1="100" y1="62" x2="100" y2="40" stroke="#1E293B" stroke-width="3" stroke-linecap="round" />
+                <line x1="100" y1="62" x2="118" y2="62" stroke="#EF4444" stroke-width="3" stroke-linecap="round" />
+                <text x="100" y="112" font-size="10" font-family="sans-serif" fill="#5B21B6" text-anchor="middle" font-weight="bold">SONO SAGRADO</text>
+              </svg>
+            </div>
+            <span class="text-xs font-bold text-violet-700 bg-violet-50 px-2.5 py-0.5 rounded-full">Ciência</span>
+            <h3 class="text-lg font-extrabold mt-2 leading-snug">
+              Pesquisa revela que apertar "soneca" sete vezes seguidas aumenta a produtividade em 0%, mas melhora o humor
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-2">
+              Os voluntários do estudo não compareceram à coletiva de imprensa porque ainda estavam dormindo.
+            </p>
+          </div>
+          <span class="text-xs text-slate-400">Leitura de 1 min</span>
+        </article>
+      </div>
+
+      <!-- Comentários Normais -->
+      <div class="news-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <h4 class="font-extrabold text-sm uppercase tracking-wider text-slate-500">💬 Comentários dos Leitores (3)</h4>
+        <div class="space-y-3 text-sm">
+          <div class="p-3 rounded-xl bg-amber-50/70">
+            <span class="font-bold text-amber-900">@mariana_cafe:</span>
+            <span class="text-slate-700"> kkkkkk o pombo no ônibus 404 sou eu toda segunda de manhã indo trabalhar</span>
+          </div>
+          <div class="p-3 rounded-xl bg-amber-50/70">
+            <span class="font-bold text-amber-900">@lucas_paodequeijo:</span>
+            <span class="text-slate-700"> Melhor jornal do Brasil, entro aqui todo dia só pra dar risada 😂</span>
+          </div>
+          <div class="p-3 rounded-xl bg-amber-50/70">
+            <span class="font-bold text-amber-900">@tia_da_coxinha:</span>
+            <span class="text-slate-700"> Meu cachorro faz igualzinho quando vê a toalha!!</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ESTÁGIO 2 (25% - 55%): ESTRANHEZA SUTIL & VALE DA ESTRANHEZA
+         =================================================================== -->
+    <section id="secao-bairro" class="space-y-8 pt-6 transition-all duration-500" data-stage="2">
+      <div class="border-l-4 border-stone-500 pl-4">
+        <span class="text-xs font-mono uppercase tracking-widest opacity-70">Edição Vespertina • Boletim Local</span>
+        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 uncanny-hover">
+          Ocorrências Incomuns no Bairro
+        </h2>
+        <p class="text-sm opacity-75 mt-1">
+          Pequenos relatos enviados por moradores que juram que algo mudou desde ontem à noite.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Card Estranho 1 -->
+        <article class="news-card uncanny-hover rounded-2xl p-6 space-y-3">
+          <div class="w-full h-40 rounded-xl bg-stone-300 overflow-hidden relative flex items-center justify-center">
+            <!-- Ilustração SVG: Sombra atrasada -->
+            <svg viewBox="0 0 260 140" class="w-full h-full">
+              <rect width="260" height="140" fill="#D6D3D1" />
+              <line x1="0" y1="115" x2="260" y2="115" stroke="#78716C" stroke-width="2" />
+              <!-- Pessoa andando para a direita -->
+              <circle cx="175" cy="48" r="10" fill="#292524" />
+              <line x1="175" y1="58" x2="175" y2="90" stroke="#292524" stroke-width="5" />
+              <line x1="175" y1="90" x2="188" y2="115" stroke="#292524" stroke-width="4" />
+              <line x1="175" y1="90" x2="164" y2="115" stroke="#292524" stroke-width="4" />
+              <!-- Sombra parada lá atrás olhando -->
+              <circle cx="75" cy="52" r="10" fill="#57534E" opacity="0.55" />
+              <line x1="75" y1="62" x2="75" y2="94" stroke="#57534E" stroke-width="5" opacity="0.55" />
+              <circle cx="78" cy="50" r="1.5" fill="#FFFFFF" />
+              <circle cx="72" cy="50" r="1.5" fill="#FFFFFF" />
+            </svg>
+          </div>
+          <span class="text-xs font-mono uppercase tracking-wider opacity-70">Relato #112 • 07:42</span>
+          <h3 class="text-xl font-extrabold leading-snug">
+            Morador afirma que sua própria sombra atrasou dois segundos para acompanhá-lo hoje de manhã
+          </h3>
+          <p class="text-sm opacity-80 leading-relaxed">
+            "Eu parei na faixa de pedestres, mas ela continuou andando mais três passos antes de perceber que eu tinha parado. Quando ela voltou para os meus pés, parecia irritada."
+          </p>
+        </article>
+
+        <!-- Card Estranho 2 -->
+        <article class="news-card uncanny-hover rounded-2xl p-6 space-y-3">
+          <div class="w-full h-40 rounded-xl bg-stone-300 overflow-hidden relative flex items-center justify-center">
+            <!-- Ilustração SVG: Relógio parado 03:14 -->
+            <svg viewBox="0 0 260 140" class="w-full h-full">
+              <rect width="260" height="140" fill="#292524" />
+              <rect x="55" y="35" width="150" height="70" rx="8" fill="#0C0A09" stroke="#57534E" stroke-width="3" />
+              <text x="130" y="82" font-size="34" font-family="monospace" fill="#EF4444" text-anchor="middle" font-weight="bold" letter-spacing="4">03:14</text>
+              <text x="130" y="125" font-size="9" font-family="monospace" fill="#A8A29E" text-anchor="middle">NÃO HAVIA 03:15</text>
+            </svg>
+          </div>
+          <span class="text-xs font-mono uppercase tracking-wider opacity-70">Relato #118 • 03:14</span>
+          <h3 class="text-xl font-extrabold leading-snug">
+            Todos os relógios da rua travaram às 03:14, mas ninguém lembra o que aconteceu durante os 40 minutos seguintes
+          </h3>
+          <p class="text-sm opacity-80 leading-relaxed">
+            Os celulares marcaram 03:14 por quase uma hora. Quando voltaram ao normal, todas as cadeiras das salas de estar estavam viradas de frente para as paredes.
+          </p>
+        </article>
+      </div>
+
+      <!-- Nota editorial inquieta -->
+      <article class="news-card uncanny-hover rounded-2xl p-6 border-l-8 border-red-900/60">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-mono font-bold uppercase text-red-800">⚠️ Nota da Redação</span>
+          <span class="text-xs font-mono opacity-60">Atualizado agora mesmo</span>
+        </div>
+        <h3 class="text-xl sm:text-2xl font-black">
+          O homem na janela do prédio em frente não pisca desde terça-feira passada — e agora ele está olhando diretamente para a sua tela
+        </h3>
+        <p class="text-sm opacity-85 mt-2 leading-relaxed">
+          Não adianta abaixar o brilho do monitor. Ele consegue ver o reflexo do seu rosto no vidro. Continue rolando a página se quiser fingir que não percebeu.
+        </p>
+      </article>
+
+      <!-- Comentários ficando estranhos -->
+      <div class="news-card rounded-2xl p-5 sm:p-6 space-y-3 font-horror-mono text-xs sm:text-sm">
+        <h4 class="font-bold uppercase tracking-wider opacity-75">💬 Comentários (Desativados pelo Administrador)</h4>
+        <div class="p-3 rounded-lg bg-black/5">
+          <span class="font-bold">@user_00941:</span>
+          <span> essa matéria não estava aqui há dez segundos atrás. quem escreveu isso?</span>
+        </div>
+        <div class="p-3 rounded-lg bg-black/5">
+          <span class="font-bold">@sem_nome:</span>
+          <span> alguém mais está ouvindo uma respiração vindo de trás da porta do quarto?</span>
+        </div>
+        <div class="p-3 rounded-lg bg-red-950/10 text-red-900">
+          <span class="font-bold">@0314_observador:</span>
+          <span> ele ainda está rolando a página. não pare.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ESTÁGIO 3 (55% - 80%): CORRUPÇÃO VISUAL, PARANOIA & ANALOG HORROR
+         =================================================================== -->
+    <section id="secao-arquivos" class="space-y-10 pt-10" data-stage="3">
+      <!-- Banner de aviso falso do sistema -->
+      <div class="rounded-xl border-2 border-red-600 bg-red-950/90 text-red-200 p-4 font-horror-mono text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xl">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl animate-pulse">👁️</span>
+          <div>
+            <p class="font-bold uppercase tracking-widest text-red-400">AVISO DO SISTEMA: TRANSMISSÃO COMPROMETIDA</p>
+            <p class="opacity-90">Você desceu além da camada segura. O sinal não pertence mais ao Arauto.</p>
+          </div>
+        </div>
+        <span class="px-2.5 py-1 bg-red-600 text-black font-black text-xs uppercase rounded">REC ● 00:03:14</span>
+      </div>
+
+      <!-- Cards tortos com aberração cromática -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <article class="news-card rounded-xl p-6 space-y-4 transform -rotate-1 border-red-900/80 shadow-2xl">
+          <div class="w-full h-44 rounded-lg bg-black overflow-hidden relative flex items-center justify-center border border-red-900/50">
+            <!-- Ilustração SVG perturbadora: Rosto distorcido no espelho -->
+            <svg viewBox="0 0 260 150" class="w-full h-full">
+              <rect width="260" height="150" fill="#09090B" />
+              <!-- Moldura de espelho -->
+              <ellipse cx="130" cy="75" rx="55" ry="65" fill="#18181B" stroke="#7F1D1D" stroke-width="3" />
+              <!-- Silhueta com sorriso largo demais -->
+              <circle cx="130" cy="65" r="28" fill="#27272A" />
+              <circle cx="119" cy="58" r="3.5" fill="#EF4444" />
+              <circle cx="141" cy="58" r="3.5" fill="#EF4444" />
+              <path d="M112 76 Q130 102 148 76" stroke="#FAFAFA" stroke-width="2.5" fill="none" />
+              <line x1="120" y1="81" x2="120" y2="87" stroke="#FAFAFA" stroke-width="1.5" />
+              <line x1="130" y1="84" x2="130" y2="90" stroke="#FAFAFA" stroke-width="1.5" />
+              <line x1="140" y1="81" x2="140" y2="87" stroke="#FAFAFA" stroke-width="1.5" />
+            </svg>
+          </div>
+          <span class="text-xs font-horror-mono text-red-500 uppercase tracking-widest">ARQUIVO CORROMPIDO // 409-B</span>
+          <h3 class="text-xl font-horror-mono font-bold chromatic-text text-red-100">
+            Transmissão interrompida: o reflexo no espelho continuou sorrindo depois que você virou o rosto
+          </h3>
+          <p class="text-sm font-horror-mono text-stone-300 leading-relaxed corrupt-text">
+            Não acenda a luz do banheiro hoje à noite. Ele já aprendeu a imitar a sua voz e está esperando você chamar alguém pelo nome para responder do corredor.
+          </p>
+        </article>
+
+        <article class="news-card rounded-xl p-6 space-y-4 transform rotate-1 border-red-900/80 shadow-2xl">
+          <div class="w-full h-44 rounded-lg bg-black overflow-hidden relative flex items-center justify-center border border-red-900/50">
+            <!-- Ilustração SVG perturbadora: Porta entreaberta com dedos -->
+            <svg viewBox="0 0 260 150" class="w-full h-full">
+              <rect width="260" height="150" fill="#050505" />
+              <!-- Fresta da porta -->
+              <rect x="95" y="10" width="70" height="135" fill="#1C1917" />
+              <rect x="148" y="10" width="17" height="135" fill="#450A0A" />
+              <!-- Dedos longos segurando a borda da porta -->
+              <ellipse cx="147" cy="68" rx="8" ry="2.5" fill="#D6D3D1" />
+              <ellipse cx="146" cy="75" rx="9" ry="2.5" fill="#D6D3D1" />
+              <ellipse cx="147" cy="82" rx="8" ry="2.5" fill="#D6D3D1" />
+              <ellipse cx="148" cy="89" rx="7" ry="2.5" fill="#D6D3D1" />
+              <!-- Olho espiando na fresta -->
+              <circle cx="156" cy="52" r="3" fill="#FFFFFF" />
+              <circle cx="155" cy="52" r="1.5" fill="#000000" />
+            </svg>
+          </div>
+          <span class="text-xs font-horror-mono text-red-500 uppercase tracking-widest">REGISTRO DE ÁUDIO // SEM ORIGEM</span>
+          <h3 class="text-xl font-horror-mono font-bold chromatic-text text-red-100">
+            A coisa no canto mais escuro do seu quarto está contando quantas vezes você ainda vai descer esta página
+          </h3>
+          <p class="text-sm font-horror-mono text-stone-300 leading-relaxed corrupt-text">
+            Você achou mesmo que isso era só um site de piadas sobre pombos? Cada rolagem trouxe ele um passo mais perto da sua cadeira.
+          </p>
+        </article>
+      </div>
+
+      <!-- Texto que vai se embaralhando dinamicamente -->
+      <div class="rounded-2xl bg-black/90 border border-red-800 p-6 sm:p-8 font-horror-mono text-red-400 space-y-4 shadow-2xl">
+        <p class="text-xs uppercase tracking-[0.25em] text-red-600">INTERCEPTAÇÃO DE SINAL LOCAL</p>
+        <p id="scrambling-paragraph" class="text-base sm:text-lg leading-relaxed">
+          VOCÊ NÃO FECHOU A PORTA DIREITO. NÃO OLHE PARA TRÁS AGORA. ELE ESTÁ BEM ATRÁS DO SEU OMBRO LENDO JUNTO COM VOCÊ.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ESTÁGIO 4 (80% - 100%): CLÍMAX DE TERROR PSICOLÓGICO & OLHO INTERATIVO
+         =================================================================== -->
+    <section id="secao-abismo" class="min-h-[90vh] flex flex-col items-center justify-center text-center py-16 px-4 space-y-8" data-stage="4">
+      <div class="space-y-3 max-w-2xl">
+        <p class="font-horror-mono text-xs sm:text-sm uppercase tracking-[0.35em] text-red-500 animate-pulse">
+          SINAL PERDIDO • CONEXÃO ESTABELECIDA
+        </p>
+        <h2 id="climax-title" class="text-3xl sm:text-5xl font-black font-horror-mono text-red-600 chromatic-text tracking-tight uppercase">
+          VOCÊ CHEGOU AO FUNDO. ELE CHEGOU ATÉ VOCÊ.
+        </h2>
+        <p class="font-horror-mono text-sm sm:text-base text-red-200/80">
+          Mova o cursor se quiser testar se ele está realmente te acompanhando.
+        </p>
+      </div>
+
+      <!-- Canvas procedural: Olho gigantesco que rastreia o cursor/toque -->
+      <div class="relative w-full max-w-md aspect-square flex items-center justify-center">
+        <canvas id="watching-eye-canvas" class="w-full h-full rounded-full shadow-[0_0_80px_rgba(220,38,38,0.45)] border border-red-900/60 bg-black"></canvas>
+      </div>
+
+      <!-- Botões de clímax e reset -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
+        <button id="trigger-jumpscare-btn" type="button" class="px-6 py-3.5 rounded-xl bg-red-700 hover:bg-red-600 text-white font-horror-mono font-bold text-sm uppercase tracking-widest shadow-[0_0_25px_rgba(220,38,38,0.7)] transition cursor-pointer">
+          👁️ OLHAR DE PERTO
+        </button>
+        <button id="reset-portal-btn" type="button" class="px-5 py-3 rounded-xl border border-red-800 text-red-400 hover:bg-red-950/60 font-horror-mono text-xs uppercase tracking-wider transition cursor-pointer">
+          ↺ Reiniciar Sinal (Voltar ao Topo)
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       OVERLAY DE CLÍMAX FINAL (AO CLICAR EM "OLHAR DE PERTO")
+       ===================================================================== -->
+  <div id="final-takeover">
+    <p class="font-horror-mono text-xs uppercase tracking-[0.4em] text-red-500 mb-4 animate-pulse">
+      NÃO VIRE O ROSTO
+    </p>
+    <h2 id="takeover-text" class="font-horror-mono text-3xl sm:text-6xl font-black text-red-600 chromatic-text mb-6">
+      ELE ESTÁ ATRÁS DE VOCÊ
+    </h2>
+    <p class="font-horror-mono text-sm sm:text-base text-stone-300 max-w-md mb-8">
+      A transmissão do Arauto do Pudim foi encerrada permanentemente.
+    </p>
+    <button id="close-takeover-btn" type="button" class="px-6 py-3 bg-white text-black font-horror-mono font-black text-xs uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition cursor-pointer">
+      RESTAURAR REALIDADE
+    </button>
+  </div>
+
+  <!-- =====================================================================
+       JAVASCRIPT: PROGRESSÃO POR SCROLL, ÁUDIO PROCEDURAL E OLHO INTERATIVO
+       ===================================================================== -->
+  <script>
+    (function () {
+      // Elementos principais
+      const root = document.documentElement;
+      const body = document.body;
+      const header = document.getElementById('main-header');
+      const topUtilityBar = document.getElementById('top-utility-bar');
+      const weatherWidget = document.getElementById('weather-widget');
+      const dateWidget = document.getElementById('date-widget');
+      const logoBadge = document.getElementById('logo-badge');
+      const siteTitle = document.getElementById('site-title');
+      const siteSubtitle = document.getElementById('site-subtitle');
+      const tickerBar = document.getElementById('ticker-bar');
+      const tickerTrack = document.getElementById('ticker-track');
+      const staticCanvas = document.getElementById('static-canvas');
+      const staticCtx = staticCanvas.getContext('2d');
+      const eyeCanvas = document.getElementById('watching-eye-canvas');
+      const eyeCtx = eyeCanvas.getContext('2d');
+      const scramblingParagraph = document.getElementById('scrambling-paragraph');
+      const finalTakeover = document.getElementById('final-takeover');
+
+      // Estado global
+      let scrollRatio = 0;
+      let pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      let currentStage = 1;
+
+      // Textos originais para restauração
+      const originalScrambleText = scramblingParagraph.textContent.trim();
+
+      // ===================================================================
+      // 1. SISTEMA DE ÁUDIO PROCEDURAL (WEB AUDIO API)
+      // ===================================================================
+      let audioCtx = null;
+      let isAudioEnabled = false;
+      let droneOsc1 = null;
+      let droneOsc2 = null;
+      let droneGain = null;
+      let noiseGain = null;
+
+      const audioToggleBtn = document.getElementById('audio-toggle-btn');
+      const audioIcon = document.getElementById('audio-icon');
+      const audioLabel = document.getElementById('audio-label');
+
+      function initWebAudio() {
+        if (audioCtx) return;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+
+        // Drone grave de tensão
+        droneOsc1 = audioCtx.createOscillator();
+        droneOsc2 = audioCtx.createOscillator();
+        droneGain = audioCtx.createGain();
+
+        droneOsc1.type = 'sawtooth';
+        droneOsc2.type = 'sine';
+        droneOsc1.frequency.value = 48; // Grave subsônico
+        droneOsc2.frequency.value = 51.5; // Batimento binaural perturbador
+
+        // Filtro passa-baixa para abafar o som no início
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 140;
+
+        droneGain.gain.value = 0.0001;
+
+        droneOsc1.connect(filter);
+        droneOsc2.connect(filter);
+        filter.connect(droneGain);
+        droneGain.connect(audioCtx.destination);
+
+        droneOsc1.start();
+        droneOsc2.start();
+
+        // Ruído branco para estática VHS nas partes finais
+        const bufferSize = audioCtx.sampleRate * 2;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.value = 0.0001;
+
+        whiteNoise.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        whiteNoise.start();
+      }
+
+      function updateAudioByScroll(ratio) {
+        if (!audioCtx || !isAudioEnabled) return;
+        const now = audioCtx.currentTime;
+
+        if (ratio < 0.25) {
+          droneGain.gain.setTargetAtTime(0.001, now, 0.2);
+          noiseGain.gain.setTargetAtTime(0.0001, now, 0.2);
+        } else {
+          const intensity = Math.min(1, (ratio - 0.25) / 0.75);
+          droneGain.gain.setTargetAtTime(0.02 + intensity * 0.14, now, 0.2);
+          droneOsc1.frequency.setTargetAtTime(48 - intensity * 14, now, 0.3);
+          droneOsc2.frequency.setTargetAtTime(51.5 + intensity * 7, now, 0.3);
+          noiseGain.gain.setTargetAtTime(Math.max(0.0001, (intensity - 0.35) * 0.045), now, 0.2);
+        }
+      }
+
+      audioToggleBtn.addEventListener('click', () => {
+        initWebAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        isAudioEnabled = !isAudioEnabled;
+        if (isAudioEnabled) {
+          audioIcon.textContent = '🔊';
+          audioLabel.textContent = 'Som Ativado';
+          updateAudioByScroll(scrollRatio);
+        } else {
+          audioIcon.textContent = '🔇';
+          audioLabel.textContent = 'Ativar Som Ambiente';
+          if (droneGain) droneGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.1);
+          if (noiseGain) noiseGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.1);
+        }
+      });
+
+      // ===================================================================
+      // 2. INTERPOLAÇÃO DE CORES E ESTADOS CONFORME O SCROLL
+      // ===================================================================
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function lerpColor(hex1, hex2, t) {
+        const c1 = parseInt(hex1.slice(1), 16);
+        const c2 = parseInt(hex2.slice(1), 16);
+        const r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
+        const r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
+        const r = Math.round(lerp(r1, r2, t));
+        const g = Math.round(lerp(g1, g2, t));
+        const b = Math.round(lerp(b1, b2, t));
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      function applyStageChanges(stage) {
+        if (stage === currentStage) return;
+        currentStage = stage;
+
+        if (stage === 1) {
+          header.className = 'sticky top-0 z-50 transition-colors duration-300 border-b-2 border-amber-300 bg-amber-400 text-slate-900 shadow-sm';
+          topUtilityBar.className = 'bg-amber-500/80 px-4 py-1.5 text-xs font-semibold flex flex-wrap items-center justify-between gap-2';
+          weatherWidget.textContent = '☀️ 26°C — Ensolarado com chance de paçoca';
+          dateWidget.textContent = 'Edição Matinal • 100% Livre de Estresse';
+          logoBadge.textContent = '🍮';
+          siteTitle.textContent = 'O ARAUTO DO PUDIM';
+          siteSubtitle.textContent = 'As notícias mais inúteis, fofas e verídicas da internet';
+          tickerBar.className = 'bg-slate-900 text-amber-300 py-1.5 overflow-hidden border-t border-amber-600/40 text-xs sm:text-sm font-bold';
+          tickerTrack.innerHTML = `
+            <span class="mx-6">🚨 URGENTE: Gato aprende a abrir a geladeira e exige vale-alimentação •</span>
+            <span class="mx-6">🦆 Pato é eleito síndico de condomínio por unanimidade após prometer mais pão •</span>
+            <span class="mx-6">☕ Cientistas comprovam: segunda-feira deveria ser opcional por decreto federal •</span>
+            <span class="mx-6">🪴 Homem rega planta de plástico por 4 meses e diz que ela "parece mais agradecida" •</span>
+            <span class="mx-6">🚨 URGENTE: Gato aprende a abrir a geladeira e exige vale-alimentação •</span>
+            <span class="mx-6">🦆 Pato é eleito síndico de condomínio por unanimidade após prometer mais pão •</span>
+          `;
+          body.classList.remove('shake-intense');
+        } else if (stage === 2) {
+          header.className = 'sticky top-0 z-50 transition-colors duration-300 border-b-2 border-stone-400 bg-stone-300 text-stone-900 shadow-sm';
+          topUtilityBar.className = 'bg-stone-400/70 px-4 py-1.5 text-xs font-mono flex flex-wrap items-center justify-between gap-2';
+          weatherWidget.textContent = '🌫️ 16°C — Neblina parada na janela';
+          dateWidget.textContent = '03:14 • Relógio dessincronizado';
+          logoBadge.textContent = '🕰️';
+          siteTitle.textContent = 'O ARAUTO DO █████';
+          siteSubtitle.textContent = 'Você tem certeza que trancou a porta hoje?';
+          tickerBar.className = 'bg-stone-900 text-stone-300 py-1.5 overflow-hidden border-t border-stone-600 text-xs sm:text-sm font-mono';
+          tickerTrack.innerHTML = `
+            <span class="mx-6">⚠️ AVISO: Sua sombra não está acompanhando seus passos •</span>
+            <span class="mx-6">👁️ O homem no prédio em frente sabe que você está lendo esta linha •</span>
+            <span class="mx-6">🕰️ Ninguém lembra o que aconteceu entre 03:14 e 03:15 •</span>
+            <span class="mx-6">⚠️ AVISO: Sua sombra não está acompanhando seus passos •</span>
+            <span class="mx-6">👁️ O homem no prédio em frente sabe que você está lendo esta linha •</span>
+          `;
+          body.classList.remove('shake-intense');
+        } else if (stage === 3) {
+          header.className = 'sticky top-0 z-50 transition-colors duration-300 border-b-2 border-red-900 bg-zinc-950 text-red-500 shadow-2xl';
+          topUtilityBar.className = 'bg-red-950/80 px-4 py-1.5 text-xs font-horror-mono flex flex-wrap items-center justify-between gap-2 text-red-200';
+          weatherWidget.textContent = '🩸 --°C — SEM SINAL EXTERNO';
+          dateWidget.textContent = 'ELE ESTÁ NO CORREDOR';
+          logoBadge.textContent = '👁️';
+          siteTitle.textContent = 'NÃO OLHE PARA TRÁS';
+          siteSubtitle.textContent = 'ELE JÁ SABE ONDE VOCÊ ESTÁ SENTADO';
+          tickerBar.className = 'bg-red-950 text-red-300 py-1.5 overflow-hidden border-t border-red-700 text-xs sm:text-sm font-horror-mono';
+          tickerTrack.innerHTML = `
+            <span class="mx-6">👁️ NÃO PARE DE ROLAR • ELE ESTÁ SE APROXIMANDO DA CADEIRA •</span>
+            <span class="mx-6">🩸 O REFLEXO NO ESPELHO NÃO É MAIS VOCÊ •</span>
+            <span class="mx-6">⚠️ A PORTA DO QUARTO ABRIU SOZINHA •</span>
+            <span class="mx-6">👁️ NÃO PARE DE ROLAR • ELE ESTÁ SE APROXIMANDO DA CADEIRA •</span>
+          `;
+          body.classList.remove('shake-intense');
+        } else if (stage === 4) {
+          header.className = 'sticky top-0 z-50 transition-colors duration-300 border-b-2 border-red-600 bg-black text-red-600 shadow-2xl';
+          weatherWidget.textContent = '👁️ ELE TE VIU';
+          dateWidget.textContent = '00:00:00';
+          siteTitle.textContent = 'VOCÊ CHEGOU AO FUNDO';
+          siteSubtitle.textContent = 'NÃO HÁ MAIS VOLTA';
+          body.classList.add('shake-intense');
+          setTimeout(() => body.classList.remove('shake-intense'), 900);
+        }
+      }
+
+      // Embaralhamento de caracteres (efeito Zalgo/corrupção leve)
+      const glitchChars = ['#', '@', '¥', 'Ø', '▓', '▒', '░', '∆', '†', '‡', '?', '0', '1'];
+      function corruptString(str, amount) {
+        if (amount <= 0) return str;
+        return str
+          .split('')
+          .map((ch) => {
+            if (ch === ' ') return ' ';
+            if (Math.random() < amount) {
+              return glitchChars[Math.floor(Math.random() * glitchChars.length)];
+            }
+            return ch;
+          })
+          .join('');
+      }
+
+      function handleScroll() {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        scrollRatio = Math.min(1, Math.max(0, scrollTop / maxScroll));
+
+        root.style.setProperty('--scroll-ratio', scrollRatio.toFixed(3));
+
+        // Transição suave de paleta por faixas de scroll
+        if (scrollRatio < 0.25) {
+          const t = scrollRatio / 0.25;
+          root.style.setProperty('--bg-color', lerpColor('#fffdf5', '#e7e5e4', t));
+          root.style.setProperty('--card-bg', lerpColor('#ffffff', '#f5f5f4', t));
+          root.style.setProperty('--text-main', lerpColor('#1f2937', '#292524', t));
+          root.style.setProperty('--border-color', lerpColor('#fde68a', '#a8a29e', t));
+          root.style.setProperty('--scanline-opacity', '0');
+          root.style.setProperty('--vignette-opacity', (t * 0.15).toFixed(2));
+          root.style.setProperty('--chromatic-shift', '0px');
+          staticCanvas.style.opacity = '0';
+          applyStageChanges(1);
+        } else if (scrollRatio < 0.55) {
+          const t = (scrollRatio - 0.25) / 0.30;
+          root.style.setProperty('--bg-color', lerpColor('#e7e5e4', '#1c1917', t));
+          root.style.setProperty('--card-bg', lerpColor('#f5f5f4', '#292524', t));
+          root.style.setProperty('--text-main', lerpColor('#292524', '#f5f5f4', t));
+          root.style.setProperty('--border-color', lerpColor('#a8a29e', '#7f1d1d', t));
+          root.style.setProperty('--scanline-opacity', (t * 0.35).toFixed(2));
+          root.style.setProperty('--vignette-opacity', (0.15 + t * 0.35).toFixed(2));
+          root.style.setProperty('--chromatic-shift', `${(t * 1.5).toFixed(1)}px`);
+          staticCanvas.style.opacity = (t * 0.08).toFixed(2);
+          applyStageChanges(2);
+        } else if (scrollRatio < 0.82) {
+          const t = (scrollRatio - 0.55) / 0.27;
+          root.style.setProperty('--bg-color', lerpColor('#1c1917', '#090000', t));
+          root.style.setProperty('--card-bg', lerpColor('#292524', '#120202', t));
+          root.style.setProperty('--text-main', '#fecaca');
+          root.style.setProperty('--border-color', '#991b1b');
+          root.style.setProperty('--scanline-opacity', (0.35 + t * 0.4).toFixed(2));
+          root.style.setProperty('--vignette-opacity', (0.50 + t * 0.35).toFixed(2));
+          root.style.setProperty('--chromatic-shift', `${(1.5 + t * 2.5).toFixed(1)}px`);
+          staticCanvas.style.opacity = (0.08 + t * 0.14).toFixed(2);
+          scramblingParagraph.textContent = corruptString(originalScrambleText, t * 0.28);
+          applyStageChanges(3);
+        } else {
+          const t = (scrollRatio - 0.82) / 0.18;
+          root.style.setProperty('--bg-color', '#030000');
+          root.style.setProperty('--card-bg', '#0a0000');
+          root.style.setProperty('--text-main', '#ef4444');
+          root.style.setProperty('--border-color', '#dc2626');
+          root.style.setProperty('--scanline-opacity', '0.85');
+          root.style.setProperty('--vignette-opacity', '0.95');
+          root.style.setProperty('--chromatic-shift', '4.5px');
+          staticCanvas.style.opacity = (0.22 + t * 0.18).toFixed(2);
+          scramblingParagraph.textContent = corruptString(originalScrambleText, 0.45);
+          applyStageChanges(4);
+        }
+
+        updateAudioByScroll(scrollRatio);
+      }
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+
+      // ===================================================================
+      // 3. CANVAS DE ESTÁTICA VHS E OLHO INTERATIVO QUE SEGUE O CURSOR
+      // ===================================================================
+      function resizeCanvases() {
+        staticCanvas.width = Math.floor(window.innerWidth / 3);
+        staticCanvas.height = Math.floor(window.innerHeight / 3);
+
+        const rect = eyeCanvas.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          eyeCanvas.width = rect.width;
+          eyeCanvas.height = rect.height;
+        }
+      }
+
+      window.addEventListener('resize', resizeCanvases);
+      resizeCanvases();
+
+      // Rastreia mouse e toque
+      window.addEventListener('mousemove', (e) => {
+        pointer.x = e.clientX;
+        pointer.y = e.clientY;
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          pointer.x = e.touches[0].clientX;
+          pointer.y = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      function renderStaticNoise() {
+        if (scrollRatio > 0.25) {
+          const w = staticCanvas.width;
+          const h = staticCanvas.height;
+          const imgData = staticCtx.createImageData(w, h);
+          const buffer = new Uint32Array(imgData.data.buffer);
+          for (let i = 0; i < buffer.length; i++) {
+            const v = Math.random() * 255;
+            buffer[i] = (45 << 24) | (v << 16) | (v << 8) | v;
+          }
+          staticCtx.putImageData(imgData, 0, 0);
+        }
+      }
+
+      function renderWatchingEye() {
+        const w = eyeCanvas.width;
+        const h = eyeCanvas.height;
+        if (!w || !h) return;
+
+        eyeCtx.clearRect(0, 0, w, h);
+        const cx = w / 2;
+        const cy = h / 2;
+        const radius = Math.min(w, h) * 0.42;
+
+        // Calcula direção do cursor relativa ao centro do canvas
+        const rect = eyeCanvas.getBoundingClientRect();
+        const eyeScreenX = rect.left + cx;
+        const eyeScreenY = rect.top + cy;
+        const dx = pointer.x - eyeScreenX;
+        const dy = pointer.y - eyeScreenY;
+        const angle = Math.atan2(dy, dx);
+        const dist = Math.min(radius * 0.34, Math.hypot(dx, dy) * 0.12);
+
+        const pupilX = cx + Math.cos(angle) * dist + (Math.random() - 0.5) * 2.5;
+        const pupilY = cy + Math.sin(angle) * dist + (Math.random() - 0.5) * 2.5;
+
+        // Esclera (globo ocular injetado de sangue)
+        const scleraGrad = eyeCtx.createRadialGradient(cx, cy, radius * 0.2, cx, cy, radius);
+        scleraGrad.addColorStop(0, '#f5f5f4');
+        scleraGrad.addColorStop(0.75, '#fca5a5');
+        scleraGrad.addColorStop(1, '#7f1d1d');
+
+        eyeCtx.save();
+        eyeCtx.beginPath();
+        eyeCtx.ellipse(cx, cy, radius, radius * 0.66, 0, 0, Math.PI * 2);
+        eyeCtx.fillStyle = scleraGrad;
+        eyeCtx.fill();
+        eyeCtx.clip();
+
+        // Veias vermelhas pulsantes
+        eyeCtx.strokeStyle = 'rgba(185, 28, 28, 0.65)';
+        eyeCtx.lineWidth = 1.6;
+        for (let i = 0; i < 16; i++) {
+          const veinAngle = (i / 16) * Math.PI * 2;
+          eyeCtx.beginPath();
+          eyeCtx.moveTo(cx + Math.cos(veinAngle) * radius, cy + Math.sin(veinAngle) * radius * 0.66);
+          eyeCtx.quadraticCurveTo(
+            cx + Math.cos(veinAngle + 0.2) * radius * 0.6,
+            cy + Math.sin(veinAngle - 0.2) * radius * 0.4,
+            pupilX,
+            pupilY
+          );
+          eyeCtx.stroke();
+        }
+
+        // Íris vermelha hipnótica
+        const irisRadius = radius * 0.36;
+        const irisGrad = eyeCtx.createRadialGradient(pupilX, pupilY, irisRadius * 0.15, pupilX, pupilY, irisRadius);
+        irisGrad.addColorStop(0, '#000000');
+        irisGrad.addColorStop(0.45, '#dc2626');
+        irisGrad.addColorStop(0.85, '#7f1d1d');
+        irisGrad.addColorStop(1, '#1c0000');
+
+        eyeCtx.beginPath();
+        eyeCtx.arc(pupilX, pupilY, irisRadius, 0, Math.PI * 2);
+        eyeCtx.fillStyle = irisGrad;
+        eyeCtx.fill();
+
+        // Pupila dilatada
+        eyeCtx.beginPath();
+        eyeCtx.arc(pupilX, pupilY, irisRadius * 0.44, 0, Math.PI * 2);
+        eyeCtx.fillStyle = '#000000';
+        eyeCtx.fill();
+
+        // Reflexo frio da tela do usuário dentro do olho
+        eyeCtx.beginPath();
+        eyeCtx.ellipse(pupilX - irisRadius * 0.25, pupilY - irisRadius * 0.25, irisRadius * 0.16, irisRadius * 0.1, -0.5, 0, Math.PI * 2);
+        eyeCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        eyeCtx.fill();
+
+        eyeCtx.restore();
+
+        // Contorno das pálpebras
+        eyeCtx.beginPath();
+        eyeCtx.ellipse(cx, cy, radius, radius * 0.66, 0, 0, Math.PI * 2);
+        eyeCtx.strokeStyle = '#991b1b';
+        eyeCtx.lineWidth = 4;
+        eyeCtx.stroke();
+      }
+
+      // Loop principal de animação (60fps)
+      let frameCount = 0;
+      function animationLoop() {
+        frameCount++;
+        if (frameCount % 2 === 0) {
+          renderStaticNoise();
+        }
+        renderWatchingEye();
+
+        // Flashes aleatórios de inversão de cor no estágio final
+        if (scrollRatio > 0.85 && Math.random() < 0.015) {
+          body.classList.add('invert-flash');
+          setTimeout(() => body.classList.remove('invert-flash'), 75);
+        }
+
+        requestAnimationFrame(animationLoop);
+      }
+
+      // ===================================================================
+      // 4. INTERAÇÕES DE CLÍMAX E REINÍCIO DO SINAL
+      // ===================================================================
+      const triggerJumpscareBtn = document.getElementById('trigger-jumpscare-btn');
+      const resetPortalBtn = document.getElementById('reset-portal-btn');
+      const closeTakeoverBtn = document.getElementById('close-takeover-btn');
+
+      triggerJumpscareBtn.addEventListener('click', () => {
+        body.classList.add('shake-intense', 'invert-flash');
+        setTimeout(() => {
+          body.classList.remove('invert-flash');
+          finalTakeover.style.display = 'flex';
+        }, 260);
+      });
+
+      function resetToTop() {
+        finalTakeover.style.display = 'none';
+        body.classList.remove('shake-intense', 'invert-flash');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      resetPortalBtn.addEventListener('click', resetToTop);
+      closeTakeoverBtn.addEventListener('click', resetToTop);
+
+      // Inicializa estado no carregamento
+      window.addEventListener('load', () => {
+        resizeCanvases();
+        handleScroll();
+        animationLoop();
+      });
+    })();
+  </script>
+</body>
+</html>
